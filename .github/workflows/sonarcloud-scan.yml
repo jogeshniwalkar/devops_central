@@ -43,7 +43,7 @@ jobs:
         with:
           projectBaseDir: complete
           args: >
-            -Dsonar.projectKey=${{ env.SONAR_PROJECT_KEY }}
+            -Dsonar.projectKey=${{ inputs.SONAR_PROJECT_KEY }}
             -Dsonar.organization=jogeshniwalkar
             -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.java.binaries=target/classes
