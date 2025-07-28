@@ -15,7 +15,7 @@ jobs:
   build-and-test:
     uses: ./.github/workflows/build-and-test.yml
     with:
-      java_version: 21
+      java_version: ${{ env.JAVA_VERSION }}
 
   sonarcloud-scan:
     needs: build-and-test
@@ -31,7 +31,7 @@ jobs:
     secrets: inherit
     #    secrets: ${{ secrets.DOCKER_HUB_TOKEN }}
     with:
-      docker_username: ${{env.DOCKER_USERNAME}}
+      docker_username: ${{ env.DOCKER_USERNAME }}
       image_name: ${{ env.IMAGE_NAME }}
 
   notify-email:
