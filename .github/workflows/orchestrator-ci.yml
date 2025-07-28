@@ -15,7 +15,8 @@ jobs:
   build-and-test:
     uses: ./.github/workflows/build-and-test.yml
     with:
-      java_version: ${{ env.JAVA_VERSION }}
+      java_version: 21
+
 
   sonarcloud-scan:
     needs: build-and-test
@@ -23,7 +24,8 @@ jobs:
     secrets: inherit
     #    secrets: ${{secrets.SONAR_TOKEN}}
     with:
-      sonar_project_key: ${{ env.SONAR_PROJECT_KEY }}
+      sonar_project_key: "jogeshniwalkar_gs-spring-boot"
+
 
   docker-build-and-push:
     needs: sonarcloud-scan
@@ -31,8 +33,8 @@ jobs:
     secrets: inherit
     #    secrets: ${{ secrets.DOCKER_HUB_TOKEN }}
     with:
-      docker_username: ${{ env.DOCKER_USERNAME }}
-      image_name: ${{ env.IMAGE_NAME }}
+      docker_username: 'jogesh22'
+      image_name:  'spring-boot-app'
 
   notify-email:
     if: failure()
