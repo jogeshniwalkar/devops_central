@@ -1,0 +1,33 @@
+# devops-pipelines/.github/workflows/build-and-test.yml
+name: Email Notify
+on:
+  workflow_call:
+    inputs:
+      upload_reports:
+        required: false
+        type: boolean
+        default: true
+
+    secrets:
+      GMAIL_APP_PASSWORD:
+        required: true
+
+
+jobs:
+  notify:
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Failure Email
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: niwalkar.jogesh@gmail.com
+          password: ${{ secrets.gmail_app_password }}
+          subject: "🚨 CI Failed: ${{ github.workflow }}"
+          to: niwalkar.jogesh@gmail.com
+          from: GitHub Actions
+          body: |
+            CI failed for ${{ github.repository }} on branch ${{ github.ref_name }}.
+            Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}

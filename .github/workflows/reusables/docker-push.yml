@@ -1,0 +1,41 @@
+name: "Docker Build and Push"
+on:
+    workflow_call:
+      inputs:
+        docker_username:
+          required: true
+          type: string
+        image_name:
+          required: true
+          type: string
+      secrets:
+        DOCKER_HUB_TOKEN:
+          required: true
+
+
+jobs:
+  docker-build-and-push:
+#    needs: sonarcloud-scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Docker Login
+        uses: docker/login-action@v3
+        with:
+          username: ${{ inputs.docker_username }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Build, Tag & Push Docker Image
+        working-directory: complete
+        run: |
+          COMMIT_ID=${{ github.sha }}
+          BRANCH_NAME=$(echo "${GITHUB_REF#refs/heads/}" | sed 's/\//-/g')
+          IMAGE=${{ inputs.docker_username }}/${{ inputs.image_name }}
+
+          docker build -t $DOCKER_USERNAME/$IMAGE:$COMMIT_ID .
+          docker tag $DOCKER_USERNAME/$IMAGE:$COMMIT_ID $DOCKER_USERNAME/$IMAGE-$BRANCH_NAME:$COMMIT_ID
+          docker tag $DOCKER_USERNAME/$IMAGE:$COMMIT_ID $DOCKER_USERNAME/$IMAGE-$BRANCH_NAME:latest
+
+          docker push $DOCKER_USERNAME/$IMAGE-$BRANCH_NAME:$COMMIT_ID
+          docker push $DOCKER_USERNAME/$IMAGE-$BRANCH_NAME:latest

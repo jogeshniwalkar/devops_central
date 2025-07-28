@@ -1,0 +1,68 @@
+# devops-pipelines/.github/workflows/build-and-test.yml
+name: Build and Test
+on:
+    workflow_call:
+      inputs:
+        java_version:
+          required: true
+          type: string
+
+        maven_goals:
+          required: false
+          type: string
+          default: "clean verify"
+        upload_reports:
+          required: false
+          type: boolean
+          default: true
+
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print GitHub metadata
+        run: echo '${{ toJSON(github) }}'
+
+      - name: Checkout the Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{inputs.java_version}}
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Build the project using Maven wrapper
+        working-directory: complete
+        run: |
+          chmod +x mvnw
+          ./mvnw ${{ inputs.maven_goals }}
+        continue-on-error: false
+
+      - name: Run Unit & Integration Tests
+        working-directory: complete
+        run: ./mvnw test --no-transfer-progress
+        continue-on-error: false
+
+      - name: Upload Test Reports (optional)
+        if: ${{ inputs.upload_reports && always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: complete/target/surefire-reports/
+        continue-on-error: false
+
+      #      - name: Upload Jacoco Report
+      #        if: always()
+      #        uses: actions/upload-artifact@v4
+      #        with:
+      #          name: jacoco-report
+      #          path: complete/target/site/jacoco
+
+      - name: Upload Compiled Classes
+        uses: actions/upload-artifact@v4
+        with:
+          name: compiled-classes
+          path: complete/target/classes

@@ -1,0 +1,40 @@
+name: Orchestrator CI Pipeline
+on:
+  push:
+    branches: [main, develop]
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: spring-boot-app
+  COMMIT_ID: ${{ github.sha }}
+  JAVA_VERSION: 21
+  SONAR_PROJECT_KEY: jogeshniwalkar_gs-spring-boot
+  DOCKER_USERNAME: jogesh22
+
+jobs:
+  build-and-test:
+    uses: ./.github/workflows/reusables/build-and-test.yml
+    with:
+      java_version: 21
+
+  sonarcloud-scan:
+    needs: build-and-test
+    uses: ./.github/workflows/reusables/sonarcloud-scan.yml
+    secrets: ${{secrets.SONAR_TOKEN}}
+    with:
+      sonar_project_key: ${{ env.SONAR_PROJECT_KEY }}
+
+  docker-build-and-push:
+    needs: sonarcloud-scan
+    uses: ./.github/workflows/reusables/docker-push.yml
+    secrets: ${{ secrets.DOCKER_HUB_TOKEN }}
+    with:
+      docker_username: ${{env.DOCKER_USERNAME}}
+      image_name: ${{ env.IMAGE_NAME }}
+
+  notify-email:
+    if: failure()
+    needs: [ build-and-test, sonarcloud-scan, docker-build-and-push ]
+    uses: ./.github/workflows/reusables/notify-email.yml
+    secrets: ${{secrets.GMAIL_APP_PASSWORD}}
+
