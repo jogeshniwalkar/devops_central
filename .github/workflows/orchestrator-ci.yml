@@ -64,5 +64,6 @@ jobs:
     needs: [ build-and-test, sonarcloud-scan, docker-build-and-push ]
     uses: ./.github/workflows/notify-email.yml
     secrets: inherit
+
 #    secrets: ${{secrets.GMAIL_APP_PASSWORD}}
 
