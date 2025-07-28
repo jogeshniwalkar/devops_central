@@ -15,7 +15,7 @@ on:
 
 jobs:
   notify:
-    if: failure()
+    if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Send Failure Email

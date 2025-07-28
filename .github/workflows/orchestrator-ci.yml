@@ -1,21 +1,45 @@
 name: Orchestrator CI Pipeline
-on:
-  push:
-    branches: [main, develop]
-  workflow_dispatch:
 
-env:
-  IMAGE_NAME: spring-boot-app
-  COMMIT_ID: ${{ github.sha }}
-  JAVA_VERSION: 21
-  SONAR_PROJECT_KEY: jogeshniwalkar_gs-spring-boot
-  DOCKER_USERNAME: jogesh22
+on:
+  workflow_call:
+    inputs:
+      java_version:
+        required: true
+        type: string
+      sonar_project_key:
+        required: true
+        type: string
+      docker_username:
+        required: true
+        type: string
+      image_name:
+        required: true
+        type: string
+      maven_goals:
+        required: false
+        type: string
+        default: "clean verify"
+      upload_reports:
+        required: false
+        type: boolean
+        default: true
+
+
+#env:
+#  IMAGE_NAME: spring-boot-app
+#  COMMIT_ID: ${{ github.sha }}
+#  JAVA_VERSION: 21
+#  SONAR_PROJECT_KEY: jogeshniwalkar_gs-spring-boot
+#  DOCKER_USERNAME: jogesh22
+#
+
+
 
 jobs:
   build-and-test:
     uses: ./.github/workflows/build-and-test.yml
     with:
-      java_version: 21
+      java_version: ${{inputs.java_version}}
 
 
   sonarcloud-scan:
@@ -24,7 +48,7 @@ jobs:
     secrets: inherit
     #    secrets: ${{secrets.SONAR_TOKEN}}
     with:
-      sonar_project_key: "jogeshniwalkar_gs-spring-boot"
+      sonar_project_key: ${{inputs.sonar_project_key}}
 
 
   docker-build-and-push:
@@ -33,8 +57,8 @@ jobs:
     secrets: inherit
     #    secrets: ${{ secrets.DOCKER_HUB_TOKEN }}
     with:
-      docker_username: 'jogesh22'
-      image_name:  'spring-boot-app'
+      docker_username: ${{inputs.docker_username}}
+      image_name: ${{inputs.image_name}}
 
   notify-email:
     if: failure()
