@@ -61,7 +61,6 @@ jobs:
       image_name: ${{inputs.image_name}}
 
   notify-email:
-    if: failure()
     needs: [ build-and-test, sonarcloud-scan, docker-build-and-push ]
     uses: ./.github/workflows/notify-email.yml
     secrets: inherit
