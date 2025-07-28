@@ -20,14 +20,16 @@ jobs:
   sonarcloud-scan:
     needs: build-and-test
     uses: ./.github/workflows/sonarcloud-scan.yml
-    secrets: ${{secrets.SONAR_TOKEN}}
+    secrets: inherit
+    #    secrets: ${{secrets.SONAR_TOKEN}}
     with:
       sonar_project_key: ${{ env.SONAR_PROJECT_KEY }}
 
   docker-build-and-push:
     needs: sonarcloud-scan
     uses: ./.github/workflows/docker-push.yml
-    secrets: ${{ secrets.DOCKER_HUB_TOKEN }}
+    secrets: inherit
+    #    secrets: ${{ secrets.DOCKER_HUB_TOKEN }}
     with:
       docker_username: ${{env.DOCKER_USERNAME}}
       image_name: ${{ env.IMAGE_NAME }}
@@ -36,5 +38,6 @@ jobs:
     if: failure()
     needs: [ build-and-test, sonarcloud-scan, docker-build-and-push ]
     uses: ./.github/workflows/notify-email.yml
-    secrets: ${{secrets.GMAIL_APP_PASSWORD}}
+    secrets: inherit
+#    secrets: ${{secrets.GMAIL_APP_PASSWORD}}
 
